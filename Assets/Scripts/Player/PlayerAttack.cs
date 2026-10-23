@@ -1,24 +1,25 @@
 using System;
+using TMPro.EditorUtilities;
 using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
     [Header("Controller")]
-    [SerializeField] private int _maxBullets;
     [SerializeField] private int _currBullets;
 
     [Header("Refs")]
-    [SerializeField] private GameObject bulletPrefab; 
+    [SerializeField] private PlayerStats _stats;
     [SerializeField] private Transform firePoint;
     [SerializeField] private Camera mainCamera;
     [SerializeField] private PlayerInput _playerInput;
 
     [Header("Settings")]
-    [SerializeField] private float bulletSpeed = 20f;
     [SerializeField] private LayerMask groundLayer;
+    private SOPlayerConfig config => _stats.Config;
+
     private bool _inputMouse0 => _playerInput.InputMouse_0;
     private bool _inputMouseDown0 => _playerInput.InputMouseDown_0;
-    public int MaxBullets => _maxBullets;
+    public int MaxBullets => config.maxBullets;
     public int CurrentBullets { get; private set; }
 
     public static event Action<int, int> OnAmmoChanged;
@@ -40,7 +41,6 @@ public class PlayerAttack : MonoBehaviour
     }
     private void ShootAtCursor()
     {
-
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hitInfo, 100f, groundLayer))
         {
@@ -51,12 +51,8 @@ public class PlayerAttack : MonoBehaviour
             targetPosition.y = firePoint.position.y;
 
             Vector3 direction = (targetPosition - firePoint.position).normalized;
-            GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.LookRotation(direction));
-
-            if (bullet.TryGetComponent<Rigidbody>(out Rigidbody rb))
-            {
-                rb.linearVelocity = direction * bulletSpeed;
-            }
+            Quaternion bulletRotation = Quaternion.LookRotation(direction);
+            PoolManager.Instance.Spawn(config.bulletConfig.prefab, firePoint.position, bulletRotation);
         }
     }
     public void RestoreBullet() 

@@ -1,18 +1,38 @@
 using System.Collections;
 using UnityEngine;
 
-public class Bullet : MonoBehaviour
+public class Bullet : PooledObject
 {
+    [SerializeField] private SOBulletConfig config;
+    private Rigidbody _rb;
+
     [SerializeField] private float _canCollectTimer = 0.2f;
     private bool canBeCollected = false;
-    void Start()
+    private void Awake()
     {
+        _rb = GetComponent<Rigidbody>();
+    }
+    void OnEnable()
+    {
+        canBeCollected = false;
         StartCoroutine(EnableCollectionRoutine());
+    }
+    private void OnDisable()
+    {
+        StopAllCoroutines();
+    }
+    public override void OnSpawn()
+    {
+        base.OnSpawn();
+
+        if (_rb != null)
+        {
+            _rb.linearVelocity = transform.forward * config.speed;
+        }
     }
     private IEnumerator EnableCollectionRoutine()
     {
         yield return new WaitForSeconds(_canCollectTimer);
-
         canBeCollected = true;
     }
     public void TryCollect(GameObject collector, PlayerAttack attack)
@@ -21,8 +41,14 @@ public class Bullet : MonoBehaviour
         {
             if (!canBeCollected) return;
         }
-
         attack.RestoreBullet();
-        Destroy(gameObject);
+        ReleaseSelf();
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.TryGetComponent<IDamageable>(out var damageable))
+        {
+            damageable.TakeDamage(config.damage);
+        }
     }
 }

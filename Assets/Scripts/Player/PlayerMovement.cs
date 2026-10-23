@@ -1,19 +1,17 @@
-using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] private float _speed;
-    [SerializeField] private float _rotationSpeed;
     [SerializeField] private Vector3 _dir;
 
     [Header("Refs")]
+    [SerializeField] private PlayerStats _stats;
     [SerializeField] private Rigidbody _rb;
     [SerializeField] private Camera mainCamera;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private PlayerInput _playerInput;
+    private SOPlayerConfig config => _stats.Config;
 
     private float _inputX => _playerInput.InputAxisX;
     private float _inputY => _playerInput.InputAxisY;
@@ -22,18 +20,25 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
+        _stats = GetComponent<PlayerStats>();
         _playerInput = GetComponent<PlayerInput>();
     }
     private void FixedUpdate()
     {
-        _rb.linearVelocity = FixedMove(_inputX, _inputY);
+        Vector3 targetVelocity = FixedMove(_inputX, _inputY);
+        targetVelocity.y = _rb.linearVelocity.y;
+
+        Vector3 velocityChange = targetVelocity - _rb.linearVelocity;
+        velocityChange.y = 0;
+
+        _rb.AddForce(velocityChange, ForceMode.VelocityChange);
 
         Rotation();
     }
     private void Rotation()
     {
         Vector3 direction = _dir;
-        var rotationSpeed = _rotationSpeed;
+        var rotationSpeed = config.rotationSpeed;
 
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, 100f, groundLayer) && _inputMouse0)
@@ -57,6 +62,6 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 FixedMove(float inputX, float inputY)
     {
         _dir = new Vector3(inputX, 0f, inputY).normalized;
-        return _dir * _speed;
+        return _dir * config.moveSpeed;
     }
 }

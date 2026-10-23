@@ -181,7 +181,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: e25c6b23894821d48be897f58d7883bf, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -250,7 +250,7 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 0
-  m_Interpolate: 1
+  m_Interpolate: 0
   m_Constraints: 4
   m_CollisionDetection: 1
 --- !u!114 &6818826737402451910
@@ -265,4 +265,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7865b7769d4df6347b8816f61ed2ce6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bullet
-  _canCollectTimer: 1
+  prefabKey: {fileID: 0}
+  config: {fileID: 11400000, guid: 30cf14b5f82e3a444a04f379998ee79a, type: 2}
+  _canCollectTimer: 0.1
