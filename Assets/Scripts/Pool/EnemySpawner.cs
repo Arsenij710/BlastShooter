@@ -3,13 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
+public class EnemyToSpawn
+{
+    public SOEnemyConfig enemyConfig;
+    [Range(0f, 100f)] public float weight;
+}
 public class EnemySpawner : MonoBehaviour
 {
     public static EnemySpawner Instance { get; private set; }
     public event Action OnVictory;
 
     [Header("Spawn Settings")]
-    [SerializeField] private SOEnemyConfig[] enemyConfigs;
+    [SerializeField] private EnemyToSpawn[] enemyConfigs;
+    [SerializeField] private Transform worldCanvasTransform;
     [SerializeField] private int maxWaves = 15;
     [SerializeField] private float spawnInterval = 3f;
     private int currentWave = 0;
@@ -86,15 +93,41 @@ public class EnemySpawner : MonoBehaviour
 
         for (int i = 0; i < spawnCount; i++)
         {
-            SOEnemyConfig config = enemyConfigs[UnityEngine.Random.Range(0, enemyConfigs.Length)];
+            SOEnemyConfig config = GetRandomEnemyConfig();
             if (config.prefab == null) continue;
 
             float randomX = shuffledLanes[i];
             Vector3 spawnPosition = new Vector3(randomX, transform.position.y, transform.position.z);
 
-            PoolManager.Instance.Spawn(config.prefab, spawnPosition, Quaternion.identity);
+            GameObject enemyObj =  PoolManager.Instance.Spawn(config.prefab, spawnPosition, Quaternion.identity);
+            if (enemyObj.TryGetComponent<Enemy>(out var enemyHealth))
+            {
+                enemyHealth.Initialize(worldCanvasTransform);
+            }
             activeEnemiesCount++;
         }
+    }
+    private SOEnemyConfig GetRandomEnemyConfig()
+    {
+        float totalWeight = 0f;
+        foreach (var config in enemyConfigs)
+        {
+            totalWeight += config.weight;
+        }
+
+        float randomValue = UnityEngine.Random.Range(0f, totalWeight);
+        float currentSum = 0f;
+
+        foreach (var config in enemyConfigs)
+        {
+            currentSum += config.weight;
+            if (randomValue <= currentSum)
+            {
+                return config.enemyConfig;
+            }
+        }
+
+        return enemyConfigs[0].enemyConfig;
     }
     public void OnEnemyDeath()
     {

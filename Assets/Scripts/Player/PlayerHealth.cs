@@ -1,4 +1,5 @@
 using System;
+using Unity.Cinemachine;
 using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour, IDamageable
@@ -11,9 +12,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public event Action<float, float> OnHealthChanged;
     public event Action OnDeath;
 
+    private CinemachineImpulseSource _impulseSource;
     private void Awake()
     {
         _stats = GetComponent<PlayerStats>();
+        _impulseSource = GetComponent<CinemachineImpulseSource>();
         currentHealth = config.maxHealth;
     }
     private void Start()
@@ -23,6 +26,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public void TakeDamage(float amount)
     {
         if (currentHealth <= 0f) return;
+
+        _impulseSource.GenerateImpulse();
 
         currentHealth -= amount;
         currentHealth = Mathf.Max(currentHealth, 0f);

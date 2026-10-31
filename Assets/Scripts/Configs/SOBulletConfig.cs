@@ -6,4 +6,6 @@ public class SOBulletConfig : ScriptableObject
     public GameObject prefab;
     public float speed = 10f;
     public float damage = 1f;
+
+    public bool isCollectible = false;
 }

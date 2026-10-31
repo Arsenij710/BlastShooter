@@ -37,6 +37,8 @@ public class Bullet : PooledObject
     }
     public void TryCollect(GameObject collector, PlayerAttack attack)
     {
+        if (config == null || !config.isCollectible) return;
+
         if (collector.TryGetComponent<PlayerAttack>(out _))
         {
             if (!canBeCollected) return;
@@ -46,9 +48,15 @@ public class Bullet : PooledObject
     }
     private void OnCollisionEnter(Collision collision)
     {
+        if (config != null && !config.isCollectible)
+        {
+            ReleaseSelf();
+        }
+        
         if (collision.gameObject.TryGetComponent<IDamageable>(out var damageable))
         {
             damageable.TakeDamage(config.damage);
+            return;
         }
     }
 }

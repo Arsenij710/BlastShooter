@@ -16,3 +16,10 @@ MonoBehaviour:
   maxHealth: 5
   fallSpeed: 0.3
   damage: 10
+  healthBarPrefab: {fileID: 8331406556483501983, guid: fbfcec13c1b2c4049be5cc2452db78f4, type: 3}
+  canShoot: 0
+  shootData:
+    bulletPrefab: {fileID: 0}
+    fireRate: 0
+    bulletSpeed: 0
+    attackRange: 0

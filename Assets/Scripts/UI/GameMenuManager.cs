@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 
 public class GameMenuManager : MonoBehaviour
@@ -7,16 +8,26 @@ public class GameMenuManager : MonoBehaviour
 
     [Header("Refs")]
     [SerializeField] private PlayerHealth playerHealth;
+    [SerializeField] private AudioMixer audioMixer;
+    [SerializeField] private string musicVolumeParam = "MusicVolume";
+    [SerializeField] private AudioSource winAudioSource;
+    [SerializeField] private AudioClip winClip;
 
     [Header("Panels")]
     [SerializeField] private CanvasGroup pausePanel;
     [SerializeField] private CanvasGroup gameOverPanel;
     [SerializeField] private CanvasGroup victoryPanel;
 
+    [Header("Audio Settings")]
+    [SerializeField] private float normalVolumeDb = 0f;
+    [SerializeField] private float pausedVolumeDb = -20f;
+
     private bool _isPause = false;
     public bool IsPause => _isPause;
     private void Awake()
     {
+        audioMixer.SetFloat(musicVolumeParam, normalVolumeDb);
+
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -27,7 +38,6 @@ public class GameMenuManager : MonoBehaviour
         HidePanel(pausePanel);
         HidePanel(gameOverPanel);
         HidePanel(victoryPanel);
-        
     }
     private void Start()
     {
@@ -38,7 +48,6 @@ public class GameMenuManager : MonoBehaviour
     {
         playerHealth.OnDeath -= ShowGameOver;
         EnemySpawner.Instance.OnVictory -= ShowVictory;
-
     }
     private void Update()
     {
@@ -55,23 +64,31 @@ public class GameMenuManager : MonoBehaviour
         _isPause = true;
         Time.timeScale = 0f;
         ShowPanel(pausePanel);
+
+        audioMixer.SetFloat(musicVolumeParam, pausedVolumeDb);
     }
     public void ResumeGame()
     {
         _isPause = false;
         Time.timeScale = 1f;
         HidePanel(pausePanel);
+
+        audioMixer.SetFloat(musicVolumeParam, normalVolumeDb);
     }
     public void ShowGameOver()
     {
         Time.timeScale = 0f;
         ShowPanel(gameOverPanel);
+        DeathAudio.Instance.HandleDeath();
     }
 
     public void ShowVictory()
     {
         Time.timeScale = 0f;
         ShowPanel(victoryPanel);
+
+        audioMixer.SetFloat(musicVolumeParam, pausedVolumeDb);
+        winAudioSource.PlayOneShot(winClip);
     }
     public void RestartGame()
     {

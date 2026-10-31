@@ -1,5 +1,4 @@
 using System;
-using TMPro.EditorUtilities;
 using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
@@ -9,6 +8,7 @@ public class PlayerAttack : MonoBehaviour
 
     [Header("Refs")]
     [SerializeField] private PlayerStats _stats;
+    [SerializeField] private SoundPlayer _shootAudio;
     [SerializeField] private Transform firePoint;
     [SerializeField] private Camera mainCamera;
     [SerializeField] private PlayerInput _playerInput;
@@ -17,7 +17,6 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     private SOPlayerConfig config => _stats.Config;
 
-    private bool _inputMouse0 => _playerInput.InputMouse_0;
     private bool _inputMouseDown0 => _playerInput.InputMouseDown_0;
     public int MaxBullets => config.maxBullets;
     public int CurrentBullets { get; private set; }
@@ -53,6 +52,7 @@ public class PlayerAttack : MonoBehaviour
             Vector3 direction = (targetPosition - firePoint.position).normalized;
             Quaternion bulletRotation = Quaternion.LookRotation(direction);
             PoolManager.Instance.Spawn(config.bulletConfig.prefab, firePoint.position, bulletRotation);
+            _shootAudio.PlaySound();
         }
     }
     public void RestoreBullet() 
